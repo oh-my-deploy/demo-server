@@ -1,0 +1,31 @@
+name: "build-deploy-dev"
+
+on:
+  push:
+    branches:
+      - dev
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  registry: docker.io
+  repository: tae2089/omd-demo-server
+  BUILD_ENV: dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: docker build push
+        uses: tae2089/github-action-modules/actions/docker-build-push@main
+        with:
+          repository: ${{ env.repository }}
+          registry: ${{ env.registry }}
+          dockerhub_username: ${{ secrets.DOCKER_USERNAME }}
+          dockerhub_password: ${{ secrets.DOCKER_PASSWORD }}
+          prefix: ${{ env.BUILD_ENV }}
