@@ -29,3 +29,9 @@ jobs:
           dockerhub_username: ${{ secrets.DOCKER_USERNAME }}
           dockerhub_password: ${{ secrets.DOCKER_PASSWORD }}
           prefix: ${{ env.BUILD_ENV }}
+      - name: slack notification
+        uses: tae2089/github-action-modules/actions/slack-notify@main
+        with:
+          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          action-name: "demo server prd build"
