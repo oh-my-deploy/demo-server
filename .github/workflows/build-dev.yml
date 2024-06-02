@@ -52,7 +52,7 @@ jobs:
           branch: dev
           path: "demo-1/program.yaml"
           key: "spec.app.container.image"
-          value: "${{env.registry}}/${{ secrets.DOCKER_USERNAME }}:${{ needs.build.outputs.tag-name }}"
+          value: "tae2089:${{ needs.build.outputs.tag-name }}"
 
       - name: slack notification
         uses: tae2089/github-action-modules/actions/slack-notify@main
