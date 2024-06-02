@@ -1,4 +1,4 @@
-name: "build-deploy-dev"
+name: "build-deploy-preview"
 
 on:
   workflow_dispatch:
@@ -12,6 +12,14 @@ on:
         description: Additional input that can be used in the build process
         required: false
         default: "{}"
+      path:
+        type: string
+        description: Path to the program.yaml file
+        required: true
+      branch:
+        type: string
+        description: Branch to deploy the preview environment
+        required: true
 
 permissions:
   contents: read
@@ -20,16 +28,21 @@ permissions:
 env:
   registry: docker.io
   repository: tae2089/omd-demo-server
-  BUILD_ENV: dev
+  BUILD_ENV: preview
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      tag-name: ${{ steps.build.outputs.tag }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.branch }}
 
       - name: docker build push
+        id: build
         uses: tae2089/github-action-modules/actions/docker-build-push@main
         with:
           repository: ${{ env.repository }}
@@ -37,9 +50,30 @@ jobs:
           dockerhub_username: ${{ secrets.DOCKER_USERNAME }}
           dockerhub_password: ${{ secrets.DOCKER_PASSWORD }}
           prefix: ${{ env.BUILD_ENV }}
+
       - name: slack notification
         uses: tae2089/github-action-modules/actions/slack-notify@main
         with:
           slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
           slack-channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
           action-name: "demo server preview build"
+
+  deploy:
+    needs: [build]
+    permissions: write-all
+    runs-on: ubuntu-latest
+    steps:
+      - name: new tag deploy
+        uses: tae2089/github-action-modules/actions/update-tag-in-deploy@main
+        with:
+          branch: dev
+          path: "${{inputs.path}}}/program.yaml"
+          key: "spec.app.container.image"
+          value: "${{env.registry}}/${{ secrets.DOCKER_USERNAME }}:${{ needs.build.outputs.tag-name }}"
+
+      - name: slack notification
+        uses: tae2089/github-action-modules/actions/slack-notify@main
+        with:
+          slack-token: ${{ secrets.SLACK_BOT_TOKEN }}
+          slack-channel-id: ${{ secrets.SLACK_CHANNEL_ID }}
+          action-name: "demo server preview deply"
