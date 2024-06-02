@@ -66,6 +66,7 @@ jobs:
       - name: new tag deploy
         uses: tae2089/github-action-modules/actions/update-tag-in-deploy@main
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           branch: dev
           path: "${{inputs.path}}}/program.yaml"
           key: "spec.app.container.image"
