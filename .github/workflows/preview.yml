@@ -69,7 +69,7 @@ jobs:
           token: ${{ secrets.GH_ACCESS_TOKEN }}
           branch: dev
           path: "${{inputs.path}}}/program.yaml"
-          key: ".spec.app.container.image"
+          key: "spec.app.container.image"
           value: "${{env.registry}}/${{ secrets.DOCKER_USERNAME }}:${{ needs.build.outputs.tag-name }}"
 
       - name: slack notification
