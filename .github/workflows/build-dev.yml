@@ -33,6 +33,9 @@ jobs:
           dockerhub_password: ${{ secrets.DOCKER_PASSWORD }}
           prefix: ${{ env.BUILD_ENV }}
 
+      - name: tag check
+        run: echo "tag is ${{ steps.build.outputs.tag }}"
+
       - name: slack notification
         uses: tae2089/github-action-modules/actions/slack-notify@main
         with:
@@ -52,7 +55,7 @@ jobs:
           branch: dev
           path: "demo-1/program.yaml"
           key: "spec.app.container.image"
-          value: "tae2089:${{ needs.build.outputs.tag-name }}"
+          value: "${{env.registry}}/${{ secrets.DOCKER_USERNAME }}:${{ needs.build.outputs.tag-name }}"
 
       - name: slack notification
         uses: tae2089/github-action-modules/actions/slack-notify@main
